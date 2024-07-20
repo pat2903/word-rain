@@ -9,8 +9,7 @@ const Game = () => {
     const [divWidth, setDivWidth] = useState(0);
     const ref = useRef(null);
 
-    // doesn't work
-    // double check this tomorrow https://stackoverflow.com/questions/43817118/how-to-get-the-width-of-a-react-element
+    // wait for div to be created before taking dimensions
     useEffect (() =>{
         if (ref.current) {
             setDivWidth(ref.current.offsetWidth)
@@ -19,7 +18,8 @@ const Game = () => {
 
     const randomiseProp = () => {
         return {
-        x: Math.random() * divWidth,
+        // random positions between 5-95% of div
+        x: `${5 + Math.random() * 90}%`,
         duration: Math.random() * 5 + 2
         }
     }
@@ -39,14 +39,14 @@ const Game = () => {
                     />
                 </h1>
             </div>
-            <div ref={ref} className='h-screen max-w-2xl w-full bg-gray-700'>
+            <div ref={ref} className='h-screen max-w-2xl w-full bg-gray-700 relative overflow-hidden'>
                 {words.map((word) => {
                     const {x, duration} = randomiseProp();
                     return(
                     <motion.span 
                     key = {word}
                     className='absolute text-white'
-                    initial={{ y: 0, x }}
+                    style={{ left: x, top: 0 }}
                     animate={{ y: '100vh' }}
                     transition={{ duration, ease: 'linear' }}
                     > 
