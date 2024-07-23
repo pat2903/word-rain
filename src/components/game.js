@@ -1,21 +1,33 @@
-import React, {useState, useRef, useEffect} from 'react';
+import React, {useState, useRef, useEffect, useMemo} from 'react';
 import Typewriter from 'typewriter-effect';
 import {motion} from 'framer-motion';
 import { TextField, Paper } from '@mui/material';
 
 const Game = () => {
-    const [score, setScore] = useState(0);
     const [gameOver, setGameOver] = useState(false);
     const [words, setWords] = useState(['Donkey', 'Slug', 'Honk', 'Bottle', 'Spice']);
     const [divWidth, setDivWidth] = useState(0);
     const ref = useRef(null);
     const [input, setInput] = useState('');
+    const [points, setPoints] = useState(0);
+    const [memoisedWords, setMemoisedWords] = useState([]);
 
     // wait for div to be created before taking dimensions
     useEffect (() =>{
         if (ref.current) {
             setDivWidth(ref.current.offsetWidth)
         }
+    }, []);
+
+    // memoise the words so that when the component is re-rendered, new properties
+    // are not generated
+    // create object that stores both words and properties
+    useEffect(()=>{
+        const initialMemoisedWords=words.map(word=>({
+            word,
+            props: randomiseProp()
+        }));
+        setMemoisedWords(initialMemoisedWords);
     }, []);
 
     const randomiseProp = () => {
@@ -28,7 +40,15 @@ const Game = () => {
     }
 
     const handleInput = (event) => {
-        setInput(event.target.value);
+        const currInput = event.target.value;
+        setInput(currInput);
+        
+        // if it's in memoisedwords, then increment points, and remove the word from memoisedwords
+        if (memoisedWords.some(({word}) => word === currInput)) {
+            setPoints(p => p + 1);
+            setMemoisedWords(w => w.filter(({word}) => word !== currInput));
+            setInput('');
+          }
       };
 
     return(
@@ -47,8 +67,8 @@ const Game = () => {
                 </h1>
             </div>
             <div ref={ref} className='h-screen max-w-2xl w-full bg-gray-700 rounded-md relative overflow-hidden'>
-                {words.map((word) => {
-                    const {x, duration, delay} = randomiseProp();
+                {memoisedWords.map(({word, props}) => {
+                    const {x, duration, delay} = props;
                     return(
                     <motion.span 
                     key = {word}
@@ -64,6 +84,7 @@ const Game = () => {
                 })}
             </div>
             <div className='max-w-2xl w-full relative bg-gray-700 mt-2'>
+                <div className="text-white mb-2">Points: {points}</div>
                 <Paper
                     elevation={16}
                     style={{
@@ -74,7 +95,7 @@ const Game = () => {
                         fullWidth
                         value={input}
                         onChange={handleInput}
-                        placeholder="Start typing here!"
+                        placeholder="Start typing here"
                     />
                 </Paper>
             </div>
