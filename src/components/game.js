@@ -1,6 +1,7 @@
 import React, {useState, useRef, useEffect} from 'react';
 import Typewriter from 'typewriter-effect';
 import {motion} from 'framer-motion';
+import { TextField, Paper } from '@mui/material';
 
 const Game = () => {
     const [score, setScore] = useState(0);
@@ -8,6 +9,7 @@ const Game = () => {
     const [words, setWords] = useState(['Donkey', 'Slug', 'Honk', 'Bottle', 'Spice']);
     const [divWidth, setDivWidth] = useState(0);
     const ref = useRef(null);
+    const [input, setInput] = useState('');
 
     // wait for div to be created before taking dimensions
     useEffect (() =>{
@@ -19,10 +21,15 @@ const Game = () => {
     const randomiseProp = () => {
         return {
         // random positions between 5-95% of div
-        x: `${5 + Math.random() * 90}%`,
-        duration: Math.random() * 5 + 2
+        x: `${10 + Math.random() * 80}%`,
+        duration: Math.random() * 8 + 2,
+        delay: Math.random() * 3
         }
     }
+
+    const handleInput = (event) => {
+        setInput(event.target.value);
+      };
 
     return(
         <div className='h-screen w-screen flex flex-col items-center bg-black'>
@@ -39,21 +46,37 @@ const Game = () => {
                     />
                 </h1>
             </div>
-            <div ref={ref} className='h-screen max-w-2xl w-full bg-gray-700 relative overflow-hidden'>
+            <div ref={ref} className='h-screen max-w-2xl w-full bg-gray-700 rounded-md relative overflow-hidden'>
                 {words.map((word) => {
-                    const {x, duration} = randomiseProp();
+                    const {x, duration, delay} = randomiseProp();
                     return(
                     <motion.span 
                     key = {word}
                     className='absolute text-white'
                     style={{ left: x, top: 0 }}
+                    initial={{ y: '-100%' }}
                     animate={{ y: '100vh' }}
-                    transition={{ duration, ease: 'linear' }}
+                    transition={{ duration, ease: 'linear', delay}}
                     > 
                         {word}
                     </motion.span>
                     );
                 })}
+            </div>
+            <div className='max-w-2xl w-full relative bg-gray-700 mt-2'>
+                <Paper
+                    elevation={16}
+                    style={{
+                    width: '100%'
+                    }}
+                >
+                    <TextField
+                        fullWidth
+                        value={input}
+                        onChange={handleInput}
+                        placeholder="Start typing here!"
+                    />
+                </Paper>
             </div>
         </div>
     );
