@@ -11,6 +11,7 @@ const Game = () => {
     const [input, setInput] = useState('');
     const [points, setPoints] = useState(0);
     const [memoisedWords, setMemoisedWords] = useState([]);
+    const [outOfViewWords, setOutOfViewWords] = useState([]);
 
     // wait for div to be created before taking dimensions
     useEffect (() =>{
@@ -30,6 +31,11 @@ const Game = () => {
         setMemoisedWords(initialMemoisedWords);
     }, []);
 
+    // get rid of out of view words
+    useEffect(() => {
+        setMemoisedWords(p => p.filter(({word}) => !outOfViewWords.includes(word)));
+    }, [outOfViewWords]);
+
     const randomiseProp = () => {
         return {
         // random positions between 5-95% of div
@@ -43,13 +49,23 @@ const Game = () => {
         const currInput = event.target.value;
         setInput(currInput);
         
-        // if it's in memoisedwords, then increment points, and remove the word from memoisedwords
-        if (memoisedWords.some(({word}) => word === currInput)) {
+        // if it's in the memoisedWords list of objects
+        // and not out of view, 
+        //then increment points, and remove the word from memoisedwords
+        if (memoisedWords.some(({word}) => word === currInput) 
+            && !outOfViewWords.includes(currInput)) {
             setPoints(p => p + 1);
             setMemoisedWords(w => w.filter(({word}) => word !== currInput));
+            setOutOfViewWords(p => p.filter(word => word !== currInput));
             setInput('');
           }
       };
+
+    // when words fall outside the div, they become out of view
+    // add to array
+    const addWordOutOfView = (word) => {
+        setOutOfViewWords(p => [...p, word])
+    }
 
     return(
         <div className='h-screen w-screen flex flex-col items-center bg-black'>
@@ -67,6 +83,7 @@ const Game = () => {
                 </h1>
             </div>
             <div ref={ref} className='h-screen max-w-2xl w-full bg-gray-700 rounded-md relative overflow-hidden'>
+                <div className="text-white flex justify-end mr-2 mt-1"> Points: {points}</div>
                 {memoisedWords.map(({word, props}) => {
                     const {x, duration, delay} = props;
                     return(
@@ -77,6 +94,7 @@ const Game = () => {
                     initial={{ y: '-100%' }}
                     animate={{ y: '100vh' }}
                     transition={{ duration, ease: 'linear', delay}}
+                    onAnimationComplete={() => addWordOutOfView(word)}
                     > 
                         {word}
                     </motion.span>
@@ -84,7 +102,6 @@ const Game = () => {
                 })}
             </div>
             <div className='max-w-2xl w-full relative bg-gray-700 mt-2'>
-                <div className="text-white mb-2">Points: {points}</div>
                 <Paper
                     elevation={16}
                     style={{
