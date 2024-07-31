@@ -17,7 +17,7 @@ export async function generateWords(count = 5) {
                     content: `Generate ${count} random words for an English language learning game. Provide only the words in a comma-separated list.`
                 }
             ],
-            temperature: 0.7,
+            temperature: 2,
             })
         });
 
