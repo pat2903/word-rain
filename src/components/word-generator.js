@@ -14,7 +14,7 @@ export async function generateWords(count = 5) {
             messages: [
                 {
                     role: 'user',
-                    content: `Generate ${count} random words for an English language learning game. Provide only the words in a comma-separated list.`
+                    content: `Generate ${count} random words for a French language learning game. They should come in a pair in the format of FrenchWord:EnglishWord. Provide this in a comma-separated list.`
                 }
             ],
             temperature: 2,
@@ -26,12 +26,23 @@ export async function generateWords(count = 5) {
         }
         
         const data = await response.json();
-        const wordList = data.choices[0].message.content.split(',').map(word => word.trim());
-        console.log(wordList);
+        // structure like
+        // { french: 'Pomme', english: 'Apple' }
+        const wordList = data.choices[0].message.content.split(',').map(pair => {
+            const [french, english] = pair.trim().split(':');
+            return { french, english };
+        });
+        // console.log(wordList);
         return wordList;
     }
     catch (error) {
         console.error('Error generating words:', error);
-        return ['Donkey', 'Slug', 'Honk', 'Bottle', 'Spice'];
+        return [
+            { french: 'Pomme', english: 'Apple' },
+            { french: 'École', english: 'School' },
+            { french: 'Ami', english: 'Friend' },
+            { french: 'Voiture', english: 'Car' },
+            { french: 'Eau', english: 'Water' }
+        ];
     }
 }

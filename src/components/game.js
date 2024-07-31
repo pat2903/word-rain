@@ -5,7 +5,7 @@ import { TextField, Paper } from '@mui/material';
 import { generateWords } from './word-generator';
 
 const Game = () => {
-    const [gameOver, setGameOver] = useState(false);
+    // const [gameOver, setGameOver] = useState(false);
     const [divWidth, setDivWidth] = useState(0);
     const ref = useRef(null);
     const [input, setInput] = useState('');
@@ -23,11 +23,12 @@ const Game = () => {
     // memoise the words so that when the component is re-rendered, new properties
     // are not generated
     // create object that stores both words and properties
+    // update: not it stores french and english as properties
     useEffect(() => {
         async function fetchAndSetWords() {
             const generatedWords = await generateWords();
-            const initialMemoisedWords = generatedWords.map(word => ({
-                word,
+            const initialMemoisedWords = generatedWords.map(wordPair => ({
+                ...wordPair,
                 props: randomiseProp()
             }));
             setMemoisedWords(initialMemoisedWords);
@@ -37,7 +38,7 @@ const Game = () => {
 
     // get rid of out of view words
     useEffect(() => {
-        setMemoisedWords(p => p.filter(({word}) => !outOfViewWords.includes(word)));
+        setMemoisedWords(p => p.filter(({french}) => !outOfViewWords.includes(french)));
     }, [outOfViewWords]);
 
     const randomiseProp = () => {
@@ -52,15 +53,19 @@ const Game = () => {
     const handleInput = (event) => {
         const currInput = event.target.value;
         setInput(currInput);
+
+        const matchedWord = memoisedWords.find(
+            ({english}) => english.toLowerCase() === currInput.toLowerCase()
+        );
         
         // if it's in the memoisedWords list of objects
         // and not out of view, 
         //then increment points, and remove the word from memoisedwords
-        if (memoisedWords.some(({word}) => word === currInput) 
-            && !outOfViewWords.includes(currInput)) {
+        if (matchedWord && !outOfViewWords.includes(matchedWord.french)) {
             setPoints(p => p + 1);
-            setMemoisedWords(w => w.filter(({word}) => word !== currInput));
-            setOutOfViewWords(p => p.filter(word => word !== currInput));
+            // remove correctly guessed(?) word
+            setMemoisedWords(w => w.filter(({french}) => french !== matchedWord.french));
+            setOutOfViewWords(p => p.filter(word => word !== matchedWord.french));
             setInput('');
           }
       };
@@ -88,19 +93,19 @@ const Game = () => {
             </div>
             <div ref={ref} className='h-screen max-w-2xl w-full bg-gray-700 rounded-md relative overflow-hidden'>
                 <div className="text-white flex justify-end mr-2 mt-1"> Points: {points}</div>
-                {memoisedWords.map(({word, props}) => {
+                {memoisedWords.map(({french, english, props}) => {
                     const {x, duration, delay} = props;
                     return(
                     <motion.span 
-                    key = {word}
+                    key = {french}
                     className='absolute text-white'
                     style={{ left: x, top: 0 }}
                     initial={{ y: '-100%' }}
                     animate={{ y: '100vh' }}
                     transition={{ duration, ease: 'linear', delay}}
-                    onAnimationComplete={() => addWordOutOfView(word)}
+                    onAnimationComplete={() => addWordOutOfView(french)}
                     > 
-                        {word}
+                        {french}
                     </motion.span>
                     );
                 })}
@@ -116,7 +121,7 @@ const Game = () => {
                         fullWidth
                         value={input}
                         onChange={handleInput}
-                        placeholder="Start typing here"
+                        placeholder="Type the English translation here... Be quick!"
                     />
                 </Paper>
             </div>
