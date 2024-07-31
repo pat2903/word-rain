@@ -2,16 +2,25 @@ import React, {useState, useRef, useEffect, useMemo} from 'react';
 import Typewriter from 'typewriter-effect';
 import {motion} from 'framer-motion';
 import { TextField, Paper } from '@mui/material';
+import { generateWords } from './word-generator';
 
 const Game = () => {
     const [gameOver, setGameOver] = useState(false);
-    const [words, setWords] = useState(['Donkey', 'Slug', 'Honk', 'Bottle', 'Spice']);
+    const [words, setWords] = useState([]);
     const [divWidth, setDivWidth] = useState(0);
     const ref = useRef(null);
     const [input, setInput] = useState('');
     const [points, setPoints] = useState(0);
     const [memoisedWords, setMemoisedWords] = useState([]);
     const [outOfViewWords, setOutOfViewWords] = useState([]);
+
+    useEffect(() => {
+        async function fetchWords() {
+            const generatedWords = await generateWords();
+            setWords(generatedWords);
+        }
+        fetchWords();
+    }, []);
 
     // wait for div to be created before taking dimensions
     useEffect (() =>{
