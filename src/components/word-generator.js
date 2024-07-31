@@ -1,9 +1,4 @@
-import OpenAI from 'openai';
-import dotenv from 'dotenv';
-
-dotenv.config()
-
-const OPEN_AI_KEY = process.env.OPEN_AI_KEY
+const OPENAI_API_KEY = process.env.REACT_APP_OPENAI_API_KEY;
 
 export async function generateWords(count = 5) {
     try {
@@ -19,7 +14,7 @@ export async function generateWords(count = 5) {
             messages: [
                 {
                     role: 'user',
-                    content: `Generate ${count} random words suitable for a word game. Provide only the words in a comma-separated list.`
+                    content: `Generate ${count} random words for an English language learning game. Provide only the words in a comma-separated list.`
                 }
             ],
             temperature: 0.7,
@@ -27,16 +22,16 @@ export async function generateWords(count = 5) {
         });
 
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(`Error: ${response.status}`);
         }
         
         const data = await response.json();
         const wordList = data.choices[0].message.content.split(',').map(word => word.trim());
+        console.log(wordList);
         return wordList;
     }
     catch (error) {
         console.error('Error generating words:', error);
-        // fallback
         return ['Donkey', 'Slug', 'Honk', 'Bottle', 'Spice'];
     }
 }
