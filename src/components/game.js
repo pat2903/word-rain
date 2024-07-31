@@ -6,21 +6,12 @@ import { generateWords } from './word-generator';
 
 const Game = () => {
     const [gameOver, setGameOver] = useState(false);
-    const [words, setWords] = useState([]);
     const [divWidth, setDivWidth] = useState(0);
     const ref = useRef(null);
     const [input, setInput] = useState('');
     const [points, setPoints] = useState(0);
     const [memoisedWords, setMemoisedWords] = useState([]);
     const [outOfViewWords, setOutOfViewWords] = useState([]);
-
-    useEffect(() => {
-        async function fetchWords() {
-            const generatedWords = await generateWords();
-            setWords(generatedWords);
-        }
-        fetchWords();
-    }, []);
 
     // wait for div to be created before taking dimensions
     useEffect (() =>{
@@ -32,12 +23,16 @@ const Game = () => {
     // memoise the words so that when the component is re-rendered, new properties
     // are not generated
     // create object that stores both words and properties
-    useEffect(()=>{
-        const initialMemoisedWords=words.map(word=>({
-            word,
-            props: randomiseProp()
-        }));
-        setMemoisedWords(initialMemoisedWords);
+    useEffect(() => {
+        async function fetchAndSetWords() {
+            const generatedWords = await generateWords();
+            const initialMemoisedWords = generatedWords.map(word => ({
+                word,
+                props: randomiseProp()
+            }));
+            setMemoisedWords(initialMemoisedWords);
+        }
+        fetchAndSetWords();
     }, []);
 
     // get rid of out of view words
