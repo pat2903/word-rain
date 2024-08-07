@@ -68,6 +68,7 @@ const Game = () => {
     const [correctWords, setCorrectWords] = useState([]);
     const [wrongWords, setWrongWords] = useState([]);
     const [totalWords, setTotalWords] = useState(0);
+    const [wordsLoaded, setWordsLoaded] = useState(false);
 
     // wait for div to be created before taking dimensions
     useEffect (() =>{
@@ -155,6 +156,7 @@ const Game = () => {
         }));
         setMemoisedWords(initialMemoisedWords);
         setTotalWords(initialMemoisedWords.length);
+        setWordsLoaded(true);
         setGameInProgress(true);
     };
 
@@ -173,14 +175,14 @@ const Game = () => {
     }
 
     useEffect(() => {
-        if (gameInProgress && totalWords > 0 && (outOfViewWords.length + correctWords.length === totalWords)) {
+        if (gameInProgress && wordsLoaded && totalWords > 0 && memoisedWords.length === 0 && (outOfViewWords.length + correctWords.length === totalWords)) {
             endGame();
         }
-    }, [correctWords, outOfViewWords, totalWords, gameInProgress]);
+    }, [correctWords, outOfViewWords, totalWords, gameInProgress, memoisedWords, wordsLoaded]);
 
     return(
         <div className='h-screen w-screen flex flex-col items-center bg-black'>
-            {(showStartScreen || !gameInProgress) && (
+            {(showStartScreen || (!gameInProgress && wordsLoaded)) && (
                 <PopUp 
                     isStart={showStartScreen}
                     points={points}
