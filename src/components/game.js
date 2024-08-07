@@ -132,10 +132,12 @@ const Game = () => {
     // when words fall outside the div, they become out of view
     // add to array
     const addWordOutOfView = (word) => {
-        setOutOfViewWords(p => [...p, word])
-        // chceck if the word is not in correctWords before adding to wrongWords
-        if (!correctWords.some(correctWord => correctWord.french === word)) {
-            setWrongWords(p => [...p, memoisedWords.find(w => w.french === word)]);
+        if (gameInProgress) {
+            setOutOfViewWords(p => [...p, word])
+            // chceck if the word is not in correctWords before adding to wrongWords
+            if (!correctWords.some(correctWord => correctWord.french === word)) {
+                setWrongWords(p => [...p, memoisedWords.find(w => w.french === word)]);
+            }
         }
     }
 
@@ -167,6 +169,7 @@ const Game = () => {
         //         !prev.some(wrongWord => wrongWord.french === word.french)
         //     )
         // ]);
+        setMemoisedWords([]);
     }
 
     useEffect(() => {
@@ -202,7 +205,7 @@ const Game = () => {
             </div>
             <div ref={ref} className='h-screen max-w-2xl w-full bg-gray-700 rounded-md relative overflow-hidden'>
                 <div className="text-white flex justify-end mr-2 mt-1"> Points: {points}</div>
-                {memoisedWords.map(({french, english, props}) => {
+                {gameInProgress && memoisedWords.map(({french, english, props}) => {
                     const {x, duration, delay} = props;
                     return(
                     <motion.span 

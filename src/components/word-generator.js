@@ -15,10 +15,10 @@ export async function generateWords(count = 5) {
             messages: [
                 {
                     role: 'user',
-                    content: `Generate ${count} random words for a French language learning game. They should come in a pair in the format of FrenchWord:EnglishWord. Provide this in a comma-separated list.`
+                    content: `Generate ${count} random words for a French language learning game. They should come strictly in a pair in the format of "FrenchWord:EnglishWord". Provide this in a comma-separated list.`
                 }
             ],
-            temperature: 2,
+            temperature: 1,
             })
         });
 
