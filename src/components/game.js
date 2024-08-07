@@ -68,6 +68,9 @@ const Game = () => {
     const [correctWords, setCorrectWords] = useState([]);
     const [wrongWords, setWrongWords] = useState([]);
     const [totalWords, setTotalWords] = useState(0);
+    // keep track of if the words are loaded
+    // if they are loaded, then we can proceed with the game
+    // to help with game synchronisation and premature game ends
     const [wordsLoaded, setWordsLoaded] = useState(false);
 
     // wait for div to be created before taking dimensions
@@ -148,6 +151,12 @@ const Game = () => {
         setOutOfViewWords([]);
         setCorrectWords([]);
         setWrongWords([]);
+        // words arent loaded instantly
+        // there is a brief moment where gameInProgress is false, wordsLoaded is true
+        // from previous game, and memoisedWords is empty
+        // this triggers endGame
+        // hence, we have to set it to false at the start
+        setWordsLoaded(false);
 
         const generatedWords = await generateWords();
         const initialMemoisedWords = generatedWords.map(wordPair => ({
