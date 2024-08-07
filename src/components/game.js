@@ -67,6 +67,7 @@ const Game = () => {
     const [outOfViewWords, setOutOfViewWords] = useState([]);
     const [correctWords, setCorrectWords] = useState([]);
     const [wrongWords, setWrongWords] = useState([]);
+    const [totalWords, setTotalWords] = useState(0);
 
     // wait for div to be created before taking dimensions
     useEffect (() =>{
@@ -122,6 +123,8 @@ const Game = () => {
             setMemoisedWords(w => w.filter(({french}) => french !== matchedWord.french));
             setOutOfViewWords(p => p.filter(word => word !== matchedWord.french));
             setCorrectWords(p => [...p, matchedWord])
+            // remove from wrong words if guessed correctly
+            setWrongWords(p => p.filter(w => w.french !== matchedWord.french));
             setInput('');
           }
       };
@@ -130,11 +133,14 @@ const Game = () => {
     // add to array
     const addWordOutOfView = (word) => {
         setOutOfViewWords(p => [...p, word])
+        // chceck if the word is not in correctWords before adding to wrongWords
+        if (!correctWords.some(correctWord => correctWord.french === word)) {
+            setWrongWords(p => [...p, memoisedWords.find(w => w.french === word)]);
+        }
     }
 
     const startGame = async () => {
         setShowStartScreen(false);
-        setGameInProgress(true);
         setPoints(0);
         setOutOfViewWords([]);
         setCorrectWords([]);
@@ -146,19 +152,28 @@ const Game = () => {
             props: randomiseProp()
         }));
         setMemoisedWords(initialMemoisedWords);
+        setTotalWords(initialMemoisedWords.length);
+        setGameInProgress(true);
     };
 
     const endGame = () => {
         setGameInProgress(false);
         setShowStartScreen(false)
-        setWrongWords(memoisedWords.filter(word => !correctWords.includes(word)));
+        // add any remaining words in memoisedWords that havent been correctly guessed
+        // setWrongWords(prev => [
+        //     ...prev,
+        //     ...memoisedWords.filter(word => 
+        //         !correctWords.some(correctWord => correctWord.french === word.french) &&
+        //         !prev.some(wrongWord => wrongWord.french === word.french)
+        //     )
+        // ]);
     }
 
-    useEffect(()=>{
-        if (outOfViewWords.length >= memoisedWords.length && gameInProgress){
+    useEffect(() => {
+        if (gameInProgress && totalWords > 0 && (outOfViewWords.length + correctWords.length === totalWords)) {
             endGame();
         }
-    }, [outOfViewWords, memoisedWords, gameInProgress]);
+    }, [correctWords, outOfViewWords, totalWords, gameInProgress]);
 
     return(
         <div className='h-screen w-screen flex flex-col items-center bg-black'>
