@@ -1,17 +1,72 @@
-import React, {useState, useRef, useEffect, useMemo} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import Typewriter from 'typewriter-effect';
 import {motion} from 'framer-motion';
 import { TextField, Paper } from '@mui/material';
 import { generateWords } from './word-generator';
 
+const PopUp = ({onStart, onRetry, isStart, points, correctWords, wrongWords}) => {
+    return (
+        <div className='absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
+            <div className='bg-white p-8 rounded-lg text-center'>
+                {isStart ? (
+                    <>
+                    <h2 className='text-2xl font-bold mb-4'>Word Rain</h2>
+                    <p className='mb-4'>Translate the falling French words into English!</p>
+                    <button
+                    className='bg-blue-500 text-white px-4 py-2 rounded'
+                    onClick={onStart}
+                    >
+                        Start Game
+                    </button>
+                    </>
+                ):(
+                    <>
+                    <h2 className='text-2xl font-bold mb-4'>Game Over</h2>
+                    <p className='mb-4'>Your score: {points}</p>
+                    <div className='mb-4'>
+                        <h3 className='font-bold'>Correct Translations:</h3>
+                        <ul>
+                            {correctWords.map((word, index)=>(
+                                <li key={index}>
+                                    {word.french} - {word.english}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                    <div className='mb-4'>
+                        <h3 className='font-bold'>Missed or Wrong Translations:</h3>
+                        <ul>
+                            {wrongWords.map((word, index)=>(
+                                <li key={index}>
+                                    {word.french} - {word.english}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                    <button 
+                    className='bg-blue-500 text-white px-4 py-2 rounded'
+                    onClick={onRetry}
+                    >
+                        Retry :)
+                    </button>
+                    </>
+                )}
+            </div>
+        </div>
+    );
+};
+
 const Game = () => {
-    // const [gameOver, setGameOver] = useState(false);
+    const [gameInProgress, setGameInProgress] = useState(false);
+    const [showStartScreen, setShowStartScreen] = useState(true);
     const [divWidth, setDivWidth] = useState(0);
     const ref = useRef(null);
     const [input, setInput] = useState('');
     const [points, setPoints] = useState(0);
     const [memoisedWords, setMemoisedWords] = useState([]);
     const [outOfViewWords, setOutOfViewWords] = useState([]);
+    const [correctWords, setCorrectWords] = useState([]);
+    const [wrongWords, setWrongWords] = useState([]);
 
     // wait for div to be created before taking dimensions
     useEffect (() =>{
@@ -24,17 +79,17 @@ const Game = () => {
     // are not generated
     // create object that stores both words and properties
     // update: not it stores french and english as properties
-    useEffect(() => {
-        async function fetchAndSetWords() {
-            const generatedWords = await generateWords();
-            const initialMemoisedWords = generatedWords.map(wordPair => ({
-                ...wordPair,
-                props: randomiseProp()
-            }));
-            setMemoisedWords(initialMemoisedWords);
-        }
-        fetchAndSetWords();
-    }, []);
+    // useEffect(() => {
+    //     async function fetchAndSetWords() {
+    //         const generatedWords = await generateWords();
+    //         const initialMemoisedWords = generatedWords.map(wordPair => ({
+    //             ...wordPair,
+    //             props: randomiseProp()
+    //         }));
+    //         setMemoisedWords(initialMemoisedWords);
+    //     }
+    //     fetchAndSetWords();
+    // }, []);
 
     // get rid of out of view words
     useEffect(() => {
@@ -66,6 +121,7 @@ const Game = () => {
             // remove correctly guessed(?) word
             setMemoisedWords(w => w.filter(({french}) => french !== matchedWord.french));
             setOutOfViewWords(p => p.filter(word => word !== matchedWord.french));
+            setCorrectWords(p => [...p, matchedWord])
             setInput('');
           }
       };
@@ -76,8 +132,46 @@ const Game = () => {
         setOutOfViewWords(p => [...p, word])
     }
 
+    const startGame = async () => {
+        setShowStartScreen(false);
+        setGameInProgress(true);
+        setPoints(0);
+        setOutOfViewWords([]);
+        setCorrectWords([]);
+        setWrongWords([]);
+
+        const generatedWords = await generateWords();
+        const initialMemoisedWords = generatedWords.map(wordPair => ({
+            ...wordPair,
+            props: randomiseProp()
+        }));
+        setMemoisedWords(initialMemoisedWords);
+    };
+
+    const endGame = () => {
+        setGameInProgress(false);
+        setShowStartScreen(false)
+        setWrongWords(memoisedWords.filter(word => !correctWords.includes(word)));
+    }
+
+    useEffect(()=>{
+        if (outOfViewWords.length >= memoisedWords.length && gameInProgress){
+            endGame();
+        }
+    }, [outOfViewWords, memoisedWords, gameInProgress]);
+
     return(
         <div className='h-screen w-screen flex flex-col items-center bg-black'>
+            {(showStartScreen || !gameInProgress) && (
+                <PopUp 
+                    isStart={showStartScreen}
+                    points={points}
+                    correctWords={correctWords}
+                    wrongWords={wrongWords}
+                    onStart={startGame}
+                    onRetry={startGame}
+                />
+            )}
             <div className='justify-start max-w-2xl mt-8'>
                 <h1 className='text-4xl font-semibold mb-8 text-white'>
                     <Typewriter
@@ -121,7 +215,7 @@ const Game = () => {
                         fullWidth
                         value={input}
                         onChange={handleInput}
-                        placeholder="Type the English translation here... Be quick!"
+                        placeholder="Enter the English translation here... Be quick!"
                     />
                 </Paper>
             </div>
