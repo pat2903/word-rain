@@ -1,10 +1,14 @@
 import React, {useState, useRef, useEffect} from 'react';
 import Typewriter from 'typewriter-effect';
 import {motion} from 'framer-motion';
-import { TextField, Paper } from '@mui/material';
+import { TextField, Paper, Slider } from '@mui/material';
 import { generateWords } from './word-generator';
 
-const PopUp = ({onStart, onRetry, isStart, points, correctWords, wrongWords}) => {
+const PopUp = ({onStart, onRetry, isStart, points, correctWords, wrongWords, wordCount, setWordCount}) => {
+    const handleSliderChange = (event, newValue) => {
+        setWordCount(newValue);
+    };
+
     return (
         <div className='absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
             <div className='bg-white p-8 rounded-lg text-center'>
@@ -12,9 +16,22 @@ const PopUp = ({onStart, onRetry, isStart, points, correctWords, wrongWords}) =>
                     <>
                     <h2 className='text-2xl font-bold mb-4'>Word Rain</h2>
                     <p className='mb-4'>Translate the falling French words into English!</p>
+                    <div className='mb-4'>
+                        <p>Select number of words:</p>
+                        <Slider
+                            value={wordCount}
+                            onChange={handleSliderChange}
+                            aria-labelledby="word-count-slider"
+                            valueLabelDisplay="auto"
+                            step={1}
+                            marks
+                            min={5}
+                            max={20}
+                        />
+                    </div>
                     <button
                     className='bg-blue-500 text-white px-4 py-2 rounded'
-                    onClick={onStart}
+                    onClick={() => onStart(wordCount)}
                     >
                         Start Game
                     </button>
@@ -45,7 +62,7 @@ const PopUp = ({onStart, onRetry, isStart, points, correctWords, wrongWords}) =>
                     </div>
                     <button 
                     className='bg-blue-500 text-white px-4 py-2 rounded'
-                    onClick={onRetry}
+                    onClick={() => onRetry(wordCount)}
                     >
                         Retry :)
                     </button>
@@ -72,6 +89,9 @@ const Game = () => {
     // if they are loaded, then we can proceed with the game
     // to help with game synchronisation and premature game ends
     const [wordsLoaded, setWordsLoaded] = useState(false);
+    // for the slider
+    // req number of words
+    const [wordCount, setWordCount] = useState(10);
 
     // wait for div to be created before taking dimensions
     useEffect (() =>{
@@ -145,7 +165,7 @@ const Game = () => {
         }
     }
 
-    const startGame = async () => {
+    const startGame = async (count) => {
         setShowStartScreen(false);
         setPoints(0);
         setOutOfViewWords([]);
@@ -158,7 +178,7 @@ const Game = () => {
         // hence, we have to set it to false at the start
         setWordsLoaded(false);
 
-        const generatedWords = await generateWords();
+        const generatedWords = await generateWords(count);
         const initialMemoisedWords = generatedWords.map(wordPair => ({
             ...wordPair,
             props: randomiseProp()
@@ -199,6 +219,8 @@ const Game = () => {
                     wrongWords={wrongWords}
                     onStart={startGame}
                     onRetry={startGame}
+                    wordCount={wordCount}
+                    setWordCount={setWordCount}
                 />
             )}
             <div className='justify-start max-w-2xl mt-8'>
