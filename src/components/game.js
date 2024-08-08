@@ -105,7 +105,7 @@ const Game = () => {
         return {
         // random positions between 5-95% of div
         x: `${10 + Math.random() * 80}%`,
-        duration: Math.random() * 8 + 2,
+        duration: Math.random() * 8 + 3,
         delay: Math.random() * 3
         }
     }
