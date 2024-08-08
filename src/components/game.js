@@ -60,6 +60,19 @@ const PopUp = ({onStart, onRetry, isStart, points, correctWords, wrongWords, wor
                             ))}
                         </ul>
                     </div>
+                    <div className='mb-4'>
+                        <p>Re-select number of words:</p>
+                        <Slider
+                            value={wordCount}
+                            onChange={handleSliderChange}
+                            aria-labelledby="word-count-slider"
+                            valueLabelDisplay="auto"
+                            step={1}
+                            marks
+                            min={5}
+                            max={20}
+                        />
+                    </div>
                     <button 
                     className='bg-blue-500 text-white px-4 py-2 rounded'
                     onClick={() => onRetry(wordCount)}
