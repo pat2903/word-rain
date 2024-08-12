@@ -11,7 +11,7 @@ const PopUp = ({onStart, onRetry, isStart, points, correctWords, wrongWords, wor
 
     return (
         <div className='absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
-            <div className='bg-white p-8 rounded-lg text-center'>
+            <div className='bg-gray-700 p-8 rounded-lg text-center text-white'>
                 {isStart ? (
                     <>
                     <h2 className='text-2xl font-bold mb-4'>Word Rain</h2>
@@ -30,7 +30,7 @@ const PopUp = ({onStart, onRetry, isStart, points, correctWords, wrongWords, wor
                         />
                     </div>
                     <button
-                    className='bg-blue-500 text-white px-4 py-2 rounded'
+                    className='bg-gray-500 px-4 py-2 rounded'
                     onClick={() => onStart(wordCount)}
                     >
                         Start Game
@@ -74,7 +74,7 @@ const PopUp = ({onStart, onRetry, isStart, points, correctWords, wrongWords, wor
                         />
                     </div>
                     <button 
-                    className='bg-blue-500 text-white px-4 py-2 rounded'
+                    className='bg-gray-500 text-white px-4 py-2 rounded'
                     onClick={() => onRetry(wordCount)}
                     >
                         Retry :)
@@ -113,22 +113,6 @@ const Game = () => {
         }
     }, []);
 
-    // memoise the words so that when the component is re-rendered, new properties
-    // are not generated
-    // create object that stores both words and properties
-    // update: not it stores french and english as properties
-    // useEffect(() => {
-    //     async function fetchAndSetWords() {
-    //         const generatedWords = await generateWords();
-    //         const initialMemoisedWords = generatedWords.map(wordPair => ({
-    //             ...wordPair,
-    //             props: randomiseProp()
-    //         }));
-    //         setMemoisedWords(initialMemoisedWords);
-    //     }
-    //     fetchAndSetWords();
-    // }, []);
-
     // get rid of out of view words
     useEffect(() => {
         setMemoisedWords(p => p.filter(({french}) => !outOfViewWords.includes(french)));
@@ -138,7 +122,8 @@ const Game = () => {
         return {
         // random positions between 5-95% of div
         x: `${10 + Math.random() * 80}%`,
-        duration: Math.random() * 8 + 3,
+        // duration between 4 and 12 seconds
+        duration: Math.random() * 8 + 4,
         delay: Math.random() * 3
         }
     }
@@ -153,7 +138,7 @@ const Game = () => {
         
         // if it's in the memoisedWords list of objects
         // and not out of view, 
-        //then increment points, and remove the word from memoisedwords
+        // then increment points, and remove the word from memoisedwords
         if (matchedWord && !outOfViewWords.includes(matchedWord.french)) {
             setPoints(p => p + 1);
             // remove correctly guessed(?) word
@@ -205,14 +190,6 @@ const Game = () => {
     const endGame = () => {
         setGameInProgress(false);
         setShowStartScreen(false)
-        // add any remaining words in memoisedWords that havent been correctly guessed
-        // setWrongWords(prev => [
-        //     ...prev,
-        //     ...memoisedWords.filter(word => 
-        //         !correctWords.some(correctWord => correctWord.french === word.french) &&
-        //         !prev.some(wrongWord => wrongWord.french === word.french)
-        //     )
-        // ]);
         setMemoisedWords([]);
     }
 
