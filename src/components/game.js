@@ -89,7 +89,6 @@ const PopUp = ({onStart, onRetry, isStart, points, correctWords, wrongWords, wor
 const Game = () => {
     const [gameInProgress, setGameInProgress] = useState(false);
     const [showStartScreen, setShowStartScreen] = useState(true);
-    const [divWidth, setDivWidth] = useState(0);
     const ref = useRef(null);
     const [input, setInput] = useState('');
     const [points, setPoints] = useState(0);
@@ -105,13 +104,6 @@ const Game = () => {
     // for the slider
     // req number of words
     const [wordCount, setWordCount] = useState(10);
-
-    // wait for div to be created before taking dimensions
-    useEffect (() =>{
-        if (ref.current) {
-            setDivWidth(ref.current.offsetWidth)
-        }
-    }, []);
 
     // get rid of out of view words
     useEffect(() => {
