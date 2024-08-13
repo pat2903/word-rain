@@ -1,4 +1,4 @@
-import React, {useState, useRef, useEffect} from 'react';
+import React, {useState, useEffect} from 'react';
 import Typewriter from 'typewriter-effect';
 import {motion} from 'framer-motion';
 import { TextField, Paper, Slider } from '@mui/material';
@@ -89,7 +89,6 @@ const PopUp = ({onStart, onRetry, isStart, points, correctWords, wrongWords, wor
 const Game = () => {
     const [gameInProgress, setGameInProgress] = useState(false);
     const [showStartScreen, setShowStartScreen] = useState(true);
-    const ref = useRef(null);
     const [input, setInput] = useState('');
     const [points, setPoints] = useState(0);
     const [memoisedWords, setMemoisedWords] = useState([]);
@@ -218,7 +217,7 @@ const Game = () => {
                     />
                 </h1>
             </div>
-            <div ref={ref} className='h-screen max-w-2xl w-full bg-gray-700 rounded-md relative overflow-hidden'>
+            <div className='h-screen max-w-2xl w-full bg-gray-700 rounded-md relative overflow-hidden'>
                 <div className="text-white flex justify-end mr-2 mt-1"> Points: {points}</div>
                 {gameInProgress && memoisedWords.map(({french, english, props}) => {
                     const {x, duration, delay} = props;
